@@ -29,3 +29,5 @@
 <img width="1540" height="861" alt="Диаграмма без названия drawio" src="https://github.com/user-attachments/assets/3adad87c-7f6e-4390-847b-bfc819d5b99a" />
 
 ## Block схема
+<img width="1844" height="836" alt="Диаграмма без названия-Страница-1 drawio" src="https://github.com/user-attachments/assets/6050d8e7-5f6b-41da-b725-a28c2acb08c4" />
+
