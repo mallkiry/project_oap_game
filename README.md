@@ -26,6 +26,6 @@
 - [x] Реализация окончания игры
 
 ## USE CASE диаграмма
-<img width="2940" height="1734" alt="Диаграмма без названия - Страница-1" src="https://github.com/user-attachments/assets/9a4fc3a1-c875-420e-bf92-e4985355e61f" />
+<img width="1540" height="861" alt="Диаграмма без названия drawio" src="https://github.com/user-attachments/assets/3adad87c-7f6e-4390-847b-bfc819d5b99a" />
 
 ## Block схема
