@@ -2,12 +2,13 @@ import tkinter as tk
 import random
 
 class HangmanGame:
+    #создание главного окна:
     def __init__(self, root):
-        self.root = root
+        self.root = root 
         self.root.title("Виселица")
         self.root.geometry("600x500")
-        self.root.resizable(False, False)
-
+        self.root.resizable(False, False) #запрет изменения окна
+    #введение слов для угадывания, запрещенные буквы, использованные, угаданные, попытки
         self.words = ['программирование', 'алгоритмизация', 'кодирование', 'информация', 'компьютер', 'клавиатура']
         self.vowels = 'ауоыиэяюёе'
         self.max_turns = 6
@@ -16,7 +17,7 @@ class HangmanGame:
         self.used_letters = []          
         self.turns_left = self.max_turns
         self.game_active = True
-
+    #рисунок для ошибок, список
         self.gallows = [
             """
      ------
@@ -89,7 +90,7 @@ class HangmanGame:
     ----------
     """
         ]
-
+    #переменные для будующих оформленных окон
         self.word_label = None
         self.gallows_label = None
         self.used_label = None
@@ -98,10 +99,11 @@ class HangmanGame:
         self.entry = None
         self.guess_btn = None
 
-        self.create_widgets()
-        self.new_game()
+        self.create_widgets() #создание виджетов
+        self.new_game() #сама игра
 
-    def create_widgets(self):
+    def create_widgets(self): #контейнеры для виселицы, букв, введения букв и прочего
+
         gallows_frame = tk.Frame(self.root)
         gallows_frame.pack(pady=10)
 
