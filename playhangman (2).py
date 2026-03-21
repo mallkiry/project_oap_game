@@ -103,27 +103,26 @@ class HangmanGame:
         self.new_game() #сама игра
 
     def create_widgets(self): #контейнеры для виселицы, букв, введения букв и прочего
-
+        #виселица
         gallows_frame = tk.Frame(self.root)
         gallows_frame.pack(pady=10)
 
         self.gallows_label = tk.Label(gallows_frame, text="", font=("Courier", 12), justify=tk.LEFT)
         self.gallows_label.pack()
-
+        #слова
         word_frame = tk.Frame(self.root)
         word_frame.pack(pady=10)
 
         self.word_label = tk.Label(word_frame, text="", font=("Arial", 24))
         self.word_label.pack()
-
+        #контейнер для поля ввода слова
         input_frame = tk.Frame(self.root)
         input_frame.pack(pady=10)
 
         tk.Label(input_frame, text="Введите букву:", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
         self.entry = tk.Entry(input_frame, width=5, font=("Arial", 14), justify='center')
         self.entry.pack(side=tk.LEFT, padx=5)
-        self.entry.bind('<Return>', lambda event: self.guess_letter())
-
+        #кнопка "угадать"
         self.guess_btn = tk.Button(input_frame, text="Угадать", command=self.guess_letter, font=("Arial", 12))
         self.guess_btn.pack(side=tk.LEFT, padx=5)
 
@@ -141,7 +140,7 @@ class HangmanGame:
 
         control_frame = tk.Frame(self.root)
         control_frame.pack(pady=10)
-
+        #кнопка "новая игра"
         new_game_btn = tk.Button(control_frame, text="Новая игра", command=self.new_game, font=("Arial", 12))
         new_game_btn.pack(side=tk.LEFT, padx=10)
 
