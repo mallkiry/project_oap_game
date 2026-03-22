@@ -143,16 +143,16 @@ class HangmanGame:
         #кнопка "новая игра"
         new_game_btn = tk.Button(control_frame, text="Новая игра", command=self.new_game, font=("Arial", 12))
         new_game_btn.pack(side=tk.LEFT, padx=10)
-
+        #кнопка правил
         rules_btn = tk.Button(control_frame, text="Правила", command=self.show_rules, font=("Arial", 12))
         rules_btn.pack(side=tk.LEFT, padx=10)
-
+        #кнопка статистика - подсчет побед
         stats_btn = tk.Button(control_frame, text="Статистика", command=self.show_stats, font=("Arial", 12))
         stats_btn.pack(side=tk.LEFT, padx=10)
-
+        #кнопка выхода
         exit_btn = tk.Button(control_frame, text="Выход", command=self.root.quit, font=("Arial", 12))
         exit_btn.pack(side=tk.LEFT, padx=10)
-
+    #функция игры самой
     def new_game(self):
  
         self.secret_word = random.choice(self.words)
@@ -160,18 +160,18 @@ class HangmanGame:
         self.used_letters = []
         self.turns_left = self.max_turns
         self.game_active = True
-
+    #перебор букв в слове, вывод гласных в угаданное для вывода(подсказки)
         for letter in self.secret_word:
             if letter in self.vowels and letter not in self.guessed_letters:
                 self.guessed_letters.append(letter)
-
+    #подготовка к возможности игрока вводить символы
         self.update_display()
         self.info_label.config(text="Игра началась! Вводите согласные буквы.")
         self.entry.config(state='normal')
         self.guess_btn.config(state='normal')
         self.entry.delete(0, tk.END)
         self.entry.focus_set()
-
+    #вывод использованных букв, ошибок, правильных букв
     def update_display(self):
 
         display_word = []
@@ -198,7 +198,7 @@ class HangmanGame:
                 self.game_over(win=True)
             elif self.turns_left == 0:
                 self.game_over(win=False)
-
+    #проверка веденных букв
     def guess_letter(self):
 
         if not self.game_active:
@@ -234,7 +234,7 @@ class HangmanGame:
             self.info_label.config(text="Такой буквы нет.", fg="red")
 
         self.update_display()
-
+    #победа или проигрыш
     def game_over(self, win):
         
         self.game_active = False
@@ -247,7 +247,7 @@ class HangmanGame:
             message = f"Вы проиграли.\nЗагаданное слово: {self.secret_word}"
 
         self.info_label.config(text=message, fg="purple")
-
+    #окно правил
     def show_rules(self):
         
         rules_window = tk.Toplevel(self.root)
@@ -257,7 +257,7 @@ class HangmanGame:
 
         tk.Label(rules_window, text="", font=("Arial", 14), fg="gray").pack(expand=True)
         tk.Button(rules_window, text="Закрыть", command=rules_window.destroy).pack(pady=10)
-
+    #окно статистики
     def show_stats(self):
     
         stats_window = tk.Toplevel(self.root)
@@ -269,6 +269,6 @@ class HangmanGame:
         tk.Button(stats_window, text="Закрыть", command=stats_window.destroy).pack(pady=10)
 
 
-root = tk.Tk()
-game = HangmanGame(root)
-root.mainloop()
+root = tk.Tk() #главное окно
+game = HangmanGame(root)#окно внутри класса, редактирование интерфейса
+root.mainloop() #цикличная работа интерфейса
