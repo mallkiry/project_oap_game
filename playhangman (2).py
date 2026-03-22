@@ -1,5 +1,8 @@
 import tkinter as tk
 import random
+from tkinter import messagebox #всплывающие окна
+import json #для загрузка статистики в файл
+import os #для проверки существования файла
 
 class HangmanGame:
     #создание главного окна:
@@ -17,6 +20,8 @@ class HangmanGame:
         self.used_letters = []          
         self.turns_left = self.max_turns
         self.game_active = True
+        self.stats_file = "hangman_stats.json"
+        self.stats = self.load_stats()
     #рисунок для ошибок, список
         self.gallows = [
             """
@@ -98,9 +103,33 @@ class HangmanGame:
         self.info_label = None
         self.entry = None
         self.guess_btn = None
-
         self.create_widgets() #создание виджетов
         self.new_game() #сама игра
+    #статистика
+    def load_stats(self):
+        if os.path.exists(self.stats_file): #существует ли файл со статистикой
+            try:
+                with open(self.stats_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except:
+                    return self.default_stats()
+        else:
+            return self.default_stats()
+
+    def default_stats(self): #исходная статистика
+        return {
+            'games_played': 0,
+            'wins': 0,
+            'losses': 0,
+            'total_guesses': 0,
+            'correct_guesses': 0,
+            'wrong_guesses': 0,
+            'words_guessed': []
+            }
+
+    def save_stats(self):
+        with open(self.stats_file, 'w', encoding='utf-8') as f:
+            json.dump(self.stats, f, ensure_ascii=False, indent=4)
 
     def create_widgets(self): #контейнеры для виселицы, букв, введения букв и прочего
         #виселица
@@ -135,7 +164,7 @@ class HangmanGame:
         self.used_label = tk.Label(info_frame, text="", font=("Arial", 12), wraplength=500)
         self.used_label.pack()
 
-        self.info_label = tk.Label(info_frame, text="", font=("Arial", 10), fg="blue")
+        self.info_label = tk.Label(info_frame, text="", font=("Arial", 10), fg="white")
         self.info_label.pack()
 
         control_frame = tk.Frame(self.root)
@@ -222,52 +251,140 @@ class HangmanGame:
         if letter in self.vowels:
             self.info_label.config(text="Гласные буквы уже открыты! Введите согласную.", fg="red")
             return
-
+        self.stats['total_guesses'] += 1
         self.used_letters.append(letter)
 
         if letter in self.secret_word:
             if letter not in self.guessed_letters:
                 self.guessed_letters.append(letter)
+            self.stats['correct_guesses'] += 1
             self.info_label.config(text="Есть такая буква!", fg="green")
         else:
             self.turns_left -= 1
+            self.stats['wrong_guesses'] += 1
             self.info_label.config(text="Такой буквы нет.", fg="red")
 
         self.update_display()
+        self.save_stats()
     #победа или проигрыш
     def game_over(self, win):
         
         self.game_active = False
         self.entry.config(state='disabled')
         self.guess_btn.config(state='disabled')
-
+        self.stats['games_played'] += 1
         if win:
+            self.stats['wins'] += 1
+            self.stats['words_guessed'].append(self.secret_word)
             message = f"Поздравляем! Вы выиграли!\nЗагаданное слово: {self.secret_word}"
         else:
+            self.stats['losses'] += 1
             message = f"Вы проиграли.\nЗагаданное слово: {self.secret_word}"
 
         self.info_label.config(text=message, fg="purple")
+        self.save_stats()
+        self.show_game_over_window(win)
+    def show_game_over_window(self, win):
+        over_window = tk.Toplevel(self.root)
+        over_window.title("Игра окончена")
+        over_window.geometry("300x150")
+        over_window.resizable(False, False)
+        over_window.grab_set()
+
+        if win:
+            result_text = "Победа!"
+        else:
+            result_text = "Поражение."
+
+        tk.Label(over_window, text=f"{result_text}\nЗагаданное слово: {self.secret_word}",
+                 font=("Arial", 12), wraplength=280, pady=10).pack()
+
+        btn_frame = tk.Frame(over_window)
+        btn_frame.pack(pady=10)
+        def new_game_and_close():
+            self.new_game()
+            over_window.destroy()
+        tk.Button(btn_frame, text="Новая игра", command=new_game_and_close, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="Закрыть", command=over_window.destroy, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
     #окно правил
     def show_rules(self):
         
         rules_window = tk.Toplevel(self.root)
         rules_window.title("Правила")
-        rules_window.geometry("300x150")
+        rules_window.geometry("400x250")
         rules_window.resizable(False, False)
+        rules_text = (
+            "Правила игры «Виселица»:\n\n"
+            "1. Вам загадано слово по теме ИТ.\n"
+            "2. Гласные буквы открыты сразу.\n"
+            "3. Вы должны угадать согласные буквы, вводите их по 1.\n"
+            "4. Если буква угадана верно, она выведется в слово.\n"
+            "5. Если нет, рисутеся виселица.\n"
+            "6. Всего даётся 6 попыток.\n"
+            "7. Выигрыш — слово открыто полностью.\n"
+            "8. Проигрыш — попытки закончились, вы кого-то повесили(."
+        )
 
-        tk.Label(rules_window, text="", font=("Arial", 14), fg="gray").pack(expand=True)
+        tk.Label(rules_window, text=rules_text, font=("Arial", 11), justify=tk.LEFT, padx=10, pady=10).pack(anchor='w')
         tk.Button(rules_window, text="Закрыть", command=rules_window.destroy).pack(pady=10)
     #окно статистики
     def show_stats(self):
     
         stats_window = tk.Toplevel(self.root)
         stats_window.title("Статистика")
-        stats_window.geometry("300x150")
+        stats_window.geometry("500x350")
         stats_window.resizable(False, False)
 
-        tk.Label(stats_window, text="", font=("Arial", 14), fg="gray").pack(expand=True)
-        tk.Button(stats_window, text="Закрыть", command=stats_window.destroy).pack(pady=10)
+        tk.Label(stats_window, text="Статистика игр", font=("Arial", 16, "bold")).pack(pady=10)
+        stats_frame = tk.Frame(stats_window)
+        stats_frame.pack(pady=10, padx=20, fill=tk.BOTH)
 
+        # Рассчитываем процент побед
+        win_percent = 0
+        if self.stats['games_played'] > 0:
+            win_percent = (self.stats['wins'] / self.stats['games_played']) * 100
+
+        stats_text = (
+            f"Сыграно игр: {self.stats['games_played']}\n"
+            f"Побед: {self.stats['wins']}\n"
+            f"Поражений: {self.stats['losses']}\n"
+            f"Процент побед: {win_percent:.1f}%\n\n"
+            f"Всего попыток: {self.stats['total_guesses']}\n"
+            f"Верных букв: {self.stats['correct_guesses']}\n"
+            f"Ошибок: {self.stats['wrong_guesses']}\n"
+            f"Точность: {self.get_accuracy()}%\n\n"
+            f"Угаданные слова: {len(self.stats['words_guessed'])}"
+        )
+
+        tk.Label(stats_frame, text=stats_text, font=("Arial", 12), justify=tk.LEFT).pack(anchor=tk.W)
+
+        # Список последних угаданных слов (максимум 5)
+        if self.stats['words_guessed']:
+            last_words = self.stats['words_guessed'][-5:]
+            words_str = ", ".join(last_words)
+            tk.Label(stats_window, text=f"Последние слова:\n{words_str}", font=("Arial", 10), wraplength=350, justify=tk.CENTER).pack(pady=10)
+
+        # Кнопки
+        btn_frame = tk.Frame(stats_window)
+        btn_frame.pack(pady=10)
+
+        tk.Button(btn_frame, text="Сбросить статистику", command=self.reset_stats_confirmation, font=("Arial", 12), bg="lightcoral").pack(side=tk.LEFT, padx=10)
+        tk.Button(btn_frame, text="Закрыть", command=stats_window.destroy, font=("Arial", 12)).pack(side=tk.LEFT, padx=10)
+
+    def get_accuracy(self):
+        """Возвращает точность угадывания в процентах."""
+        if self.stats['total_guesses'] == 0:
+            return 0
+        return round((self.stats['correct_guesses'] / self.stats['total_guesses']) * 100, 1)
+
+    def reset_stats_confirmation(self):
+        """Подтверждение сброса статистики."""
+        result = messagebox.askyesno("Сброс статистики", "Вы уверены, что хотите обнулить всю статистику?")
+        if result:
+            self.stats = self.default_stats()
+            self.save_stats()
+            messagebox.showinfo("Статистика", "Статистика сброшена.")
+            # Можно обновить открытое окно статистики, но для простоты оставим так.
 
 root = tk.Tk() #главное окно
 game = HangmanGame(root)#окно внутри класса, редактирование интерфейса

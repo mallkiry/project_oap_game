@@ -1,0 +1,11 @@
+{
+    "games_played": 1,
+    "wins": 1,
+    "losses": 0,
+    "total_guesses": 10,
+    "correct_guesses": 7,
+    "wrong_guesses": 3,
+    "words_guessed": [
+        "алгоритмизация"
+    ]
+}
