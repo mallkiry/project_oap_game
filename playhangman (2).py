@@ -127,7 +127,7 @@ class HangmanGame:
             'words_guessed': []
             }
 
-    def save_stats(self):
+    def save_stats(self): #сохранение статистики
         with open(self.stats_file, 'w', encoding='utf-8') as f:
             json.dump(self.stats, f, ensure_ascii=False, indent=4)
 
@@ -281,9 +281,10 @@ class HangmanGame:
             self.stats['losses'] += 1
             message = f"Вы проиграли.\nЗагаданное слово: {self.secret_word}"
 
-        self.info_label.config(text=message, fg="purple")
+        self.info_label.config(text=message, fg="white")
         self.save_stats()
         self.show_game_over_window(win)
+    #окно победы или проигрыша
     def show_game_over_window(self, win):
         over_window = tk.Toplevel(self.root)
         over_window.title("Игра окончена")
@@ -339,52 +340,39 @@ class HangmanGame:
         stats_frame = tk.Frame(stats_window)
         stats_frame.pack(pady=10, padx=20, fill=tk.BOTH)
 
-        # Рассчитываем процент побед
+        #оформление статистики
         win_percent = 0
         if self.stats['games_played'] > 0:
             win_percent = (self.stats['wins'] / self.stats['games_played']) * 100
-
         stats_text = (
             f"Сыграно игр: {self.stats['games_played']}\n"
             f"Побед: {self.stats['wins']}\n"
             f"Поражений: {self.stats['losses']}\n"
-            f"Процент побед: {win_percent:.1f}%\n\n"
+            f"Процент побед: {win_percent:.1f}%\n"
             f"Всего попыток: {self.stats['total_guesses']}\n"
             f"Верных букв: {self.stats['correct_guesses']}\n"
             f"Ошибок: {self.stats['wrong_guesses']}\n"
-            f"Точность: {self.get_accuracy()}%\n\n"
             f"Угаданные слова: {len(self.stats['words_guessed'])}"
         )
 
         tk.Label(stats_frame, text=stats_text, font=("Arial", 12), justify=tk.LEFT).pack(anchor=tk.W)
-
-        # Список последних угаданных слов (максимум 5)
+        #последние угаданные слова
         if self.stats['words_guessed']:
             last_words = self.stats['words_guessed'][-5:]
             words_str = ", ".join(last_words)
             tk.Label(stats_window, text=f"Последние слова:\n{words_str}", font=("Arial", 10), wraplength=350, justify=tk.CENTER).pack(pady=10)
 
-        # Кнопки
         btn_frame = tk.Frame(stats_window)
         btn_frame.pack(pady=10)
-
         tk.Button(btn_frame, text="Сбросить статистику", command=self.reset_stats_confirmation, font=("Arial", 12), bg="lightcoral").pack(side=tk.LEFT, padx=10)
         tk.Button(btn_frame, text="Закрыть", command=stats_window.destroy, font=("Arial", 12)).pack(side=tk.LEFT, padx=10)
-
-    def get_accuracy(self):
-        """Возвращает точность угадывания в процентах."""
-        if self.stats['total_guesses'] == 0:
-            return 0
-        return round((self.stats['correct_guesses'] / self.stats['total_guesses']) * 100, 1)
-
+    #окно сброса статистики
     def reset_stats_confirmation(self):
-        """Подтверждение сброса статистики."""
         result = messagebox.askyesno("Сброс статистики", "Вы уверены, что хотите обнулить всю статистику?")
         if result:
             self.stats = self.default_stats()
             self.save_stats()
             messagebox.showinfo("Статистика", "Статистика сброшена.")
-            # Можно обновить открытое окно статистики, но для простоты оставим так.
 
 root = tk.Tk() #главное окно
 game = HangmanGame(root)#окно внутри класса, редактирование интерфейса
