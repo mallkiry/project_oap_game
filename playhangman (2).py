@@ -3,6 +3,15 @@ import random
 from tkinter import messagebox #всплывающие окна
 import json #для загрузка статистики в файл
 import os #для проверки существования файла
+import logging
+
+logging.basicConfig(
+    filename='game.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    encoding='utf-8'
+)
+
 
 class HangmanGame:
     #создание главного окна:
@@ -105,6 +114,8 @@ class HangmanGame:
         self.guess_btn = None
         self.create_widgets() #создание виджетов
         self.new_game() #сама игра
+        logging.info("Игра запущена")
+
     #статистика
     def load_stats(self):
         if os.path.exists(self.stats_file): #существует ли файл со статистикой
@@ -200,6 +211,7 @@ class HangmanGame:
         self.guess_btn.config(state='normal')
         self.entry.delete(0, tk.END)
         self.entry.focus_set()
+        logging.info(f"Новая игра. Загадано слово: {self.secret_word} (гласные открыты)")
     #вывод использованных букв, ошибок, правильных букв
     def update_display(self):
 
@@ -238,31 +250,37 @@ class HangmanGame:
 
         if not letter:
             self.info_label.config(text="Вы ничего не ввели!", fg="red")
+            logging.info("Попытка ввода пустой строки")
             return
         if len(letter) != 1:
             self.info_label.config(text="Введите одну букву!", fg="red")
+            logging.info(f"Попытка ввода более одной буквы: {letter}")
             return
         if not ('а' <= letter <= 'я'):
             self.info_label.config(text="Введите русскую букву!", fg="red")
+            logging.info(f"Попытка ввода не русской буквы: {letter}")
             return
         if letter in self.used_letters:
             self.info_label.config(text="Эта буква уже была!", fg="red")
+            logging.info(f"Повторный ввод буквы: {letter}")
             return
         if letter in self.vowels:
             self.info_label.config(text="Гласные буквы уже открыты! Введите согласную.", fg="red")
+            logging.info(f"Попытка ввести гласную: {letter}")
             return
         self.stats['total_guesses'] += 1
         self.used_letters.append(letter)
-
         if letter in self.secret_word:
             if letter not in self.guessed_letters:
                 self.guessed_letters.append(letter)
             self.stats['correct_guesses'] += 1
             self.info_label.config(text="Есть такая буква!", fg="green")
+            logging.info(f"Буква '{letter}' есть в слове")
         else:
             self.turns_left -= 1
             self.stats['wrong_guesses'] += 1
             self.info_label.config(text="Такой буквы нет.", fg="red")
+            logging.info(f"Буква '{letter}' отсутствует в слове, осталось попыток: {self.turns_left}")
 
         self.update_display()
         self.save_stats()
@@ -277,9 +295,11 @@ class HangmanGame:
             self.stats['wins'] += 1
             self.stats['words_guessed'].append(self.secret_word)
             message = f"Поздравляем! Вы выиграли!\nЗагаданное слово: {self.secret_word}"
+            logging.info(f"Победа! Слово '{self.secret_word}' угадано")
         else:
             self.stats['losses'] += 1
             message = f"Вы проиграли.\nЗагаданное слово: {self.secret_word}"
+            logging.info(f"Поражение. Загаданное слово: {self.secret_word}")
 
         self.info_label.config(text=message, fg="white")
         self.save_stats()
@@ -305,8 +325,10 @@ class HangmanGame:
         def new_game_and_close():
             self.new_game()
             over_window.destroy()
+            logging.info("Окно окончания игры закрыто, начата новая игра")
         tk.Button(btn_frame, text="Новая игра", command=new_game_and_close, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Закрыть", command=over_window.destroy, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
+        logging.info(f"Открыто окно окончания игры: {result_text}")
     #окно правил
     def show_rules(self):
         
@@ -328,6 +350,7 @@ class HangmanGame:
 
         tk.Label(rules_window, text=rules_text, font=("Arial", 11), justify=tk.LEFT, padx=10, pady=10).pack(anchor='w')
         tk.Button(rules_window, text="Закрыть", command=rules_window.destroy).pack(pady=10)
+        logging.info("Открыто окно правил")
     #окно статистики
     def show_stats(self):
     
@@ -364,16 +387,22 @@ class HangmanGame:
 
         btn_frame = tk.Frame(stats_window)
         btn_frame.pack(pady=10)
-        tk.Button(btn_frame, text="Сбросить статистику", command=self.reset_stats_confirmation, font=("Arial", 12), bg="lightcoral").pack(side=tk.LEFT, padx=10)
-        tk.Button(btn_frame, text="Закрыть", command=stats_window.destroy, font=("Arial", 12)).pack(side=tk.LEFT, padx=10)
+        def reset_and_log():
+            self.reset_stats_confirmation()
+        tk.Button(btn_frame, text="Сбросить статистику", command=reset_and_log, font=("Arial", 12), bg="lightcoral").pack(side=tk.LEFT, padx=10)
+        tk.Button(btn_frame, text="Закрыть", command=lambda: (stats_window.destroy(), logging.info("Окно статистики закрыто")), font=("Arial", 12)).pack(side=tk.LEFT, padx=10)
+        logging.info("Открыто окно статистики")
+
     #окно сброса статистики
     def reset_stats_confirmation(self):
         result = messagebox.askyesno("Сброс статистики", "Вы уверены, что хотите обнулить всю статистику?")
         if result:
             self.stats = self.default_stats()
             self.save_stats()
+            logging.info("Статистика сброшена пользователем")
             messagebox.showinfo("Статистика", "Статистика сброшена.")
 
 root = tk.Tk() #главное окно
 game = HangmanGame(root)#окно внутри класса, редактирование интерфейса
+root.protocol("WM_DELETE_WINDOW", lambda: (logging.info("Приложение закрыто пользователем"), root.destroy()))
 root.mainloop() #цикличная работа интерфейса
