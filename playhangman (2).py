@@ -12,7 +12,6 @@ logging.basicConfig(
     encoding='utf-8'
 )
 
-
 class HangmanGame:
     #создание главного окна:
     def __init__(self, root):
@@ -327,7 +326,9 @@ class HangmanGame:
             over_window.destroy()
             logging.info("Окно окончания игры закрыто, начата новая игра")
         tk.Button(btn_frame, text="Новая игра", command=new_game_and_close, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_frame, text="Закрыть", command=over_window.destroy, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="Закрыть",
+                  command=lambda: (over_window.destroy(), logging.info("Окно окончания игры закрыто")),  # добавлено логирование
+                  font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
         logging.info(f"Открыто окно окончания игры: {result_text}")
     #окно правил
     def show_rules(self):
@@ -349,7 +350,9 @@ class HangmanGame:
         )
 
         tk.Label(rules_window, text=rules_text, font=("Arial", 11), justify=tk.LEFT, padx=10, pady=10).pack(anchor='w')
-        tk.Button(rules_window, text="Закрыть", command=rules_window.destroy).pack(pady=10)
+        tk.Button(rules_window, text="Закрыть",
+                  command=lambda: (rules_window.destroy(), logging.info("Окно правил закрыто")),  # добавлено логирование
+                  font=("Arial", 12)).pack(pady=10)
         logging.info("Открыто окно правил")
     #окно статистики
     def show_stats(self):
@@ -390,7 +393,9 @@ class HangmanGame:
         def reset_and_log():
             self.reset_stats_confirmation()
         tk.Button(btn_frame, text="Сбросить статистику", command=reset_and_log, font=("Arial", 12), bg="lightcoral").pack(side=tk.LEFT, padx=10)
-        tk.Button(btn_frame, text="Закрыть", command=lambda: (stats_window.destroy(), logging.info("Окно статистики закрыто")), font=("Arial", 12)).pack(side=tk.LEFT, padx=10)
+        tk.Button(btn_frame, text="Закрыть",
+                  command=lambda: (stats_window.destroy(), logging.info("Окно статистики закрыто")),  # добавлено логирование
+                  font=("Arial", 12)).pack(side=tk.LEFT, padx=10)
         logging.info("Открыто окно статистики")
 
     #окно сброса статистики
@@ -401,6 +406,8 @@ class HangmanGame:
             self.save_stats()
             logging.info("Статистика сброшена пользователем")
             messagebox.showinfo("Статистика", "Статистика сброшена.")
+        else:
+            logging.info("Сброс статистики отменён")  # добавлено логирование
 
 root = tk.Tk() #главное окно
 game = HangmanGame(root)#окно внутри класса, редактирование интерфейса

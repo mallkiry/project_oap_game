@@ -1,13 +1,9 @@
 {
-    "games_played": 3,
-    "wins": 3,
+    "games_played": 0,
+    "wins": 0,
     "losses": 0,
-    "total_guesses": 18,
-    "correct_guesses": 18,
+    "total_guesses": 0,
+    "correct_guesses": 0,
     "wrong_guesses": 0,
-    "words_guessed": [
-        "информация",
-        "компьютер",
-        "алгоритмизация"
-    ]
+    "words_guessed": []
 }
