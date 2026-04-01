@@ -303,7 +303,7 @@ class HangmanGame:
         self.info_label.config(text=message, fg="white")
         self.save_stats()
         self.show_game_over_window(win)
-    #окно победы или проигрыша
+    #окно  победы или проигрыша
     def show_game_over_window(self, win):
         over_window = tk.Toplevel(self.root)
         over_window.title("Игра окончена")
